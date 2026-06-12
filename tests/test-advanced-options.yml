@@ -1,0 +1,39 @@
+name: Test advanced options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create publish and functions directories
+        run: |
+          mkdir -p /tmp/publish && echo "hello" > /tmp/publish/index.html
+          mkdir -p /tmp/functions
+          cat > /tmp/netlify.toml <<'EOF'
+          [build]
+            publish = "dist"
+          EOF
+      - id: action
+        uses: .
+        with:
+          publish-dir: /tmp/publish
+          functions-dir: /tmp/functions
+          netlify-config-path: /tmp/netlify.toml
+          alias: "preview-test"
+          production-branch: "main"
+          fails-without-credentials: "false"
+        continue-on-error: true
+      - name: Assert action ran
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran (outcome=$OUTCOME)"
