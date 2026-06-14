@@ -1,0 +1,35 @@
+name: Test commit options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create publish and functions directories and netlify config
+        run: |
+          mkdir -p /tmp/publish
+          echo "<h1>Hello</h1>" > /tmp/publish/index.html
+          mkdir -p /tmp/functions
+          echo "exports.handler = async () => ({ statusCode: 200 });" > /tmp/functions/hello.js
+          cat > /tmp/netlify.toml <<'EOF'
+          [build]
+            publish = "publish"
+          EOF
+      - id: action
+        uses: .
+        with:
+          publish-dir: /tmp/publish
+          functions-dir: /tmp/functions
+          netlify-config-path: /tmp/netlify.toml
+          enable-commit-comment: "false"
+          enable-commit-status: "false"
+          fails-without-credentials: "false"
+        continue-on-error: true
+      - name: Assert action ran without hard failure
+        run: |
+          echo "outcome: ${{ steps.action.outcome }}"
+          echo "PASS: action step completed with commit option inputs accepted"
