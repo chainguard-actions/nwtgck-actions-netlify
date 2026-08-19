@@ -1,0 +1,35 @@
+name: Test production deploy flag
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create publish directory
+        run: mkdir -p /tmp/publish && echo "<html><body>Production</body></html>" > /tmp/publish/index.html
+
+      - id: action
+        uses: .
+        with:
+          publish-dir: /tmp/publish
+          production-deploy: "true"
+          production-branch: "main"
+          deploy-message: "Production deploy test"
+          fails-without-credentials: "false"
+        continue-on-error: true
+
+      - name: Assert action completed without hard failure
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: action failed unexpectedly when fails-without-credentials is false"
+            exit 1
+          fi
+          echo "PASS: action completed gracefully with production-deploy flag"

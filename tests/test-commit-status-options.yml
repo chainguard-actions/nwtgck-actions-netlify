@@ -1,0 +1,22 @@
+name: Test commit status and PR comment options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create publish directory
+        run: mkdir -p /tmp/publish-dir && echo "hello" > /tmp/publish-dir/index.html
+      - id: action
+        uses: .
+        with:
+          publish-dir: /tmp/publish-dir
+          github-token: ${{ github.token }}
+          enable-commit-status: true
+          overwrites-pull-request-comment: true
+          fails-without-credentials: false
+      - name: Assert action completed without error
+        run: |
+          echo "Action completed successfully (no Netlify credentials, graceful exit)"
+          echo "PASS"

@@ -1,0 +1,39 @@
+name: Test pull request scenario
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/pull/1/merge
+      GITHUB_EVENT_NAME: pull_request
+      GITHUB_HEAD_REF: feature-branch
+      GITHUB_BASE_REF: main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create publish directory
+        run: mkdir -p /tmp/publish && echo "<html><body>PR Preview</body></html>" > /tmp/publish/index.html
+
+      - id: action
+        uses: .
+        with:
+          publish-dir: /tmp/publish
+          production-branch: "main"
+          deploy-message: "PR preview deploy"
+          enable-pull-request-comment: "false"
+          enable-commit-comment: "false"
+          fails-without-credentials: "false"
+          alias: "pr-preview"
+        continue-on-error: true
+
+      - name: Assert action completed without hard failure
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: action failed unexpectedly when fails-without-credentials is false"
+            exit 1
+          fi
+          echo "PASS: action completed gracefully for pull request scenario"

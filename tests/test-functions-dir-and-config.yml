@@ -1,0 +1,30 @@
+name: Test functions-dir and netlify-config-path inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create publish and functions directories and netlify config
+        run: |
+          mkdir -p /tmp/publish-dir
+          echo "hello" > /tmp/publish-dir/index.html
+          mkdir -p /tmp/functions-dir
+          echo "exports.handler = async () => ({ statusCode: 200 });" > /tmp/functions-dir/hello.js
+          cat > /tmp/netlify.toml <<'EOF'
+          [build]
+            publish = "dist"
+            functions = "functions"
+          EOF
+      - id: action
+        uses: .
+        with:
+          publish-dir: /tmp/publish-dir
+          functions-dir: /tmp/functions-dir
+          netlify-config-path: /tmp/netlify.toml
+          fails-without-credentials: false
+      - name: Assert action completed without error
+        run: |
+          echo "Action completed successfully with functions-dir and netlify-config-path (no Netlify credentials, graceful exit)"
+          echo "PASS"
