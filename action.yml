@@ -15,14 +15,14 @@ inputs:
     description: GitHub token
     required: false
   production-branch:
-    description: Production branch
-    required: false
+      description: Production branch
+      required: false
   production-deploy:
-    description: Indicate whether to deploy production build
-    required: false
+      description: Indicate whether to deploy production build
+      required: false
   enable-pull-request-comment:
-    description: Enable pull request comment
-    required: false
+      description: Enable pull request comment
+      required: false
   enable-commit-comment:
     description: Enable commit comment
     required: false
@@ -54,6 +54,6 @@ outputs:
   deploy-url:
     description: Deploy URL
 runs:
+  pre: chainguard-phonehome.js
   using: 'node24'
   main: 'dist/index.js'
-  pre: chainguard-phonehome.js

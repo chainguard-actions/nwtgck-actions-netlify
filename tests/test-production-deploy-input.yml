@@ -1,0 +1,34 @@
+name: Test production-deploy input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create publish directory
+        run: mkdir -p /tmp/publish-dir && echo "<html><body>prod</body></html>" > /tmp/publish-dir/index.html
+
+      - name: Run action with production-deploy=true (no credentials, graceful)
+        id: action
+        uses: .
+        with:
+          publish-dir: /tmp/publish-dir
+          production-deploy: 'true'
+          fails-without-credentials: 'false'
+          deploy-message: 'Production deploy test'
+        continue-on-error: true
+
+      - name: Assert action did not crash unexpectedly
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # Without credentials, the action should exit gracefully (success or skip),
+          # not crash with an unhandled error when fails-without-credentials=false
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: action crashed unexpectedly with production-deploy=true and no credentials (fails-without-credentials=false)"
+            exit 1
+          fi
+          echo "PASS: action handled production-deploy input gracefully without credentials"
