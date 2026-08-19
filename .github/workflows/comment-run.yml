@@ -1,0 +1,24 @@
+name: "Comment run"
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  comment-run:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
+      with:
+        # 0 indicates all history
+        fetch-depth: 0
+    - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3
+      with:
+        node-version: 12
+    - uses: nwtgck/actions-comment-run@ce01ade2c0d5e78e665bc9f5c13ad040d8491ebc # v1.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        allowed-associations: '["OWNER"]'

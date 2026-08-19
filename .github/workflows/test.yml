@@ -1,0 +1,40 @@
+name: "build-test"
+on:
+  push:
+  pull_request:
+
+permissions:
+  statuses: write
+  deployments: write
+  pull-requests: write
+
+jobs:
+  build: # make sure build/ci work properly
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3
+        with:
+          node-version: 16
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3
+      - run: npm ci
+      - run: npm run all
+  test: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3
+      - name: Create a simple Web site
+        run: mkdir -p deploy_dist && echo -e "<pre>$(date -u)\n$GITHUB_SHA\n$GITHUB_REF</pre>" > deploy_dist/index.html
+      - uses: ./
+        id: deploy-to-netlify
+        with:
+          publish-dir: './deploy_dist'
+          production-branch: master
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions"
+          functions-dir: './functions-test'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      - env:
+          DEPLOY_URL: ${{ steps.deploy-to-netlify.outputs.deploy-url }}
+        run: echo "outputs.deploy-url: $DEPLOY_URL"

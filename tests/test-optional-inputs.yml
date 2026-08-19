@@ -1,0 +1,38 @@
+name: Test optional inputs accepted
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create publish directory
+        run: |
+          mkdir -p /tmp/publish-site
+          echo "<html><body>Test Site</body></html>" > /tmp/publish-site/index.html
+
+      # Test that all optional inputs are accepted without error
+      # No credentials → graceful exit (fails-without-credentials defaults to false)
+      - id: action
+        uses: .
+        with:
+          publish-dir: /tmp/publish-site
+          deploy-message: "My custom deploy message"
+          production-deploy: "false"
+          enable-pull-request-comment: "false"
+          enable-commit-comment: "false"
+          enable-commit-status: "false"
+          overwrites-pull-request-comment: "false"
+          alias: "my-preview"
+          github-deployment-environment: "staging"
+          github-deployment-description: "Staging deployment"
+          fails-without-credentials: "false"
+        env:
+          NETLIFY_AUTH_TOKEN: ""
+          NETLIFY_SITE_ID: ""
+
+      - name: Assert action completed without failure
+        run: |
+          echo "Action accepted all optional inputs and completed gracefully without credentials"
+          echo "PASS"
