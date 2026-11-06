@@ -4,8 +4,13 @@
   "version": "v2.1.0",
   "commit_sha": "7a92f00dde8c92a5a9e8385ec2919775f7647352",
   "url": "https://github.com/nwtgck/actions-netlify",
-  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "policy_sha": "374911c4be584df24e6da57af2d990570ef0f859",
   "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
   "test_agent_version": "2",
-  "harden_agent_version": "2"
+  "harden_agent_version": "2",
+  "dist_artifact": {
+    "gcs_uri": "gs://patch-actions-node-artifacts/dist-artifacts/nwtgck/actions-netlify/v2.1.0/sha256-a3a23cbd4a9b83bf82961376bb9e77de5e37cbf929e6c47e2a4c2ead8776c3c3.tar.gz",
+    "sha256": "a3a23cbd4a9b83bf82961376bb9e77de5e37cbf929e6c47e2a4c2ead8776c3c3",
+    "size_bytes": 4226286
+  }
 }
